@@ -9,6 +9,7 @@ const CommentSection = ({
     comments,
     formatTime,
     videoSrc,
+    videoName,
 }) => {
     const handleInputKeyDown = (e) => {
         if (e.key === " ") {
@@ -16,9 +17,11 @@ const CommentSection = ({
         }
     };
 
+    console.log("Rendering CommentSection with:", { comments, videoName });
+
     return (
         <>
-            <CommentStorage comments={comments} />
+            <CommentStorage comments={comments} videoName={videoName} />
             <form onSubmit={handleSubmitComment} className="commentBox">
                 <input
                     type="text"

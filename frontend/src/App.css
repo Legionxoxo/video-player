@@ -285,59 +285,6 @@
     transform: scale(1.2);
 }
 
-.commentBox {
-    margin-top: 20px;
-    display: flex;
-    gap: 10px;
-}
-
-.commentInput {
-    flex: 1;
-    padding: 10px 15px;
-    border: 1px solid #333;
-    border-radius: 6px;
-    background: #242424;
-    color: white;
-    font-size: 14px;
-    transition: border-color 0.3s ease;
-}
-
-.commentInput:focus {
-    outline: none;
-    border-color: #ff758c;
-}
-
-.commentButton {
-    padding: 10px 20px;
-    background: #ff758c;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    transition: background 0.3s ease;
-}
-
-.commentButton:hover {
-    background: #ff7eb3;
-}
-
-.commentList {
-    margin-top: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.comment {
-    background: #242424;
-    padding: 15px;
-    border-radius: 8px;
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-}
-
 .commentContent {
     display: flex;
     flex-direction: column;
@@ -542,32 +489,4 @@
     padding: 5px 10px;
     border-radius: 4px;
     cursor: pointer;
-}
-
-.comment {
-    margin-bottom: 20px;
-    padding: 10px;
-    border-radius: 4px;
-}
-
-.commentContent {
-    margin-bottom: 10px;
-}
-
-.commentText {
-    display: block;
-    margin-bottom: 5px;
-}
-
-.timestamp {
-    display: block;
-    font-size: 0.9em;
-    color: #666;
-}
-
-.shapeCoordinates {
-    display: block;
-    font-size: 0.9em;
-    color: #666;
-    margin-bottom: 5px;
 }

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import MiniPlayer from "./MiniPlayer";
 import CommentStorage from "./CommentStorage";
-import { MessageCircle, CheckCircle } from "lucide-react";
+import { MessageCircle, Check, CheckCheck } from "lucide-react";
 
 const formatDate = (date) => {
     return date
@@ -70,80 +70,107 @@ const CommentSection = ({
         }
     };
 
-    console.log("Rendering CommentSection with:", { comments, videoName });
-
     return (
         <>
-            <CommentStorage comments={comments} videoName={videoName} />
-            <form onSubmit={handleSubmitComment} className="commentBox">
-                <input
-                    type="text"
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                    onKeyDown={handleInputKeyDown}
-                    placeholder="Add a comment..."
-                    className="commentInput"
-                />
-                <button type="submit" className="commentButton">
-                    Submit
-                </button>
-            </form>
+            <div className="flex flex-row mx-5 items-center mt-2">
+                <form onSubmit={handleSubmitComment} className="">
+                    <input
+                        type="text"
+                        value={comment}
+                        onChange={(e) => setComment(e.target.value)}
+                        onKeyDown={handleInputKeyDown}
+                        placeholder="Add a comment..."
+                        className="border-1 border-black rounded-md px-4 py-2 text-[#000000]"
+                    />
+                    <button
+                        type="submit"
+                        className="text-white bg-blue-500 text-lg font-medium px-4 py-2 rounded-md mt-3 cursor-pointer ml-2 hover:bg-blue-600"
+                    >
+                        Submit
+                    </button>
+                </form>
+            </div>
 
-            <div className="commentList">
+            <div className=" flex flex-col gap-3">
                 {comments.map((comment, index) => (
                     <div
                         key={index}
-                        className={`comment ${comment.isReply ? "reply" : ""}`}
+                        className={`flex flex-col justify-between border rounded-xl  bg-[#f6f6f6] m-5 ${
+                            comment.isReply
+                                ? "ml-20 -mt-3 rounded-xl text-white flex flex-col"
+                                : ""
+                        }`}
                     >
-                        <div className="commentContent">
-                            <span className="commentName">John</span>
-                            <span className="commentEmail">john@gmail.com</span>
-                            <span className="timestamp">
-                                {formatTime(comment.timeRange.start)}
-                                {comment.timeRange.start !==
-                                    comment.timeRange.end &&
-                                    ` - ${formatTime(comment.timeRange.end)}`}
+                        <div className="p-5">
+                            <span className=" text-[20px] text-[#000000]">
+                                John
                             </span>
-                            <span className="commentText">{comment.text}</span>
-                            <span className="commentTimestamp">
-                                {formatDate(new Date())}
+                            <br />
+                            <span className=" text-sm text-[#969696] font-medium">
+                                john@gmail.com
                             </span>
-                            <div className="commentActions">
+                            <span className=" text-sm">
+                                <p className="text-[#969696] italic my-1">
+                                    {formatTime(comment.timeRange.start)}
+                                    {comment.timeRange.start !==
+                                        comment.timeRange.end &&
+                                        ` to ${formatTime(
+                                            comment.timeRange.end
+                                        )}`}
+                                </p>
+                            </span>
+                            <span className=" text-[#434343] text-[16px] text-pretty">
+                                <p className="mt-2">{comment.text}</p>
+                            </span>
+
+                            <span className=" text-[#969696] text-sm italic">
+                                <p className="my-3">{formatDate(new Date())}</p>
+                            </span>
+                            <div className="flex flex-row gap-x-6">
                                 <MessageCircle
-                                    className="icon"
+                                    className="text-[#969696] w-8 h-8 cursor-pointer"
                                     onClick={() => handleReply(index)}
                                 />
+
                                 {!comment.isReply && (
                                     <div
                                         onClick={() => handleResolve(index)}
-                                        className="resolveAction"
+                                        className=""
                                     >
                                         {resolvedComments[index] ? (
                                             <>
-                                                <CheckCircle className="icon" />
-                                                <span className="resolvedText">
-                                                    Resolved
-                                                </span>
+                                                <div className="flex flex-row gap-1 cursor-pointer">
+                                                    <CheckCheck className="w-8 h-8 cursor-pointer text-[#969696]" />
+                                                    <span className="text-[#969696] text-center text-sm mt-[7px] ml-1">
+                                                        Resolved
+                                                    </span>
+                                                </div>
                                             </>
                                         ) : (
-                                            <span className="resolveText">
-                                                Resolve
+                                            <span className="flex flex-row text-[#969696] gap-1 cursor-pointer">
+                                                <Check className="w-8 h-8 cursor-pointer" />
+                                                <p className="text-[#969696] text-center text-sm mt-[7px]">
+                                                    Resolve
+                                                </p>
                                             </span>
                                         )}
                                     </div>
                                 )}
                             </div>
                         </div>
+
                         {!comment.isReply && (
-                            <MiniPlayer
-                                videoSrc={videoSrc}
-                                startTime={comment.timeRange.start}
-                                endTime={comment.timeRange.end}
-                                shapeInfo={comment.shapeInfo}
-                            />
+                            <div className="-mt-2 ml-5 mb-4">
+                                <MiniPlayer
+                                    videoSrc={videoSrc}
+                                    startTime={comment.timeRange.start}
+                                    endTime={comment.timeRange.end}
+                                    shapeInfo={comment.shapeInfo}
+                                />
+                            </div>
                         )}
                         {replies[index] !== undefined && (
-                            <div className="replyBox">
+                            <div className="flex flex-row mb-4">
                                 <input
                                     type="text"
                                     value={replies[index]}
@@ -151,11 +178,11 @@ const CommentSection = ({
                                         handleReplyChange(index, e.target.value)
                                     }
                                     placeholder="Add a reply..."
-                                    className="replyInput"
+                                    className="border-1 border-gray-300 rounded-md px-3 py-2 text-black mt-3 ml-5"
                                 />
                                 <button
                                     onClick={() => handleReplySubmit(index)}
-                                    className="replyButton"
+                                    className="text-[#000000] text-lg font-medium px-4 py-2 rounded-md mt-3 cursor-pointer ml-2"
                                 >
                                     Reply
                                 </button>

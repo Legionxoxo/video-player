@@ -370,7 +370,7 @@ const VideoPlayer = ({ src }) => {
     };
 
     return (
-        <div className="video-player-container">
+        <div className="video-player-container overflow-hidden">
             <div
                 className={`video-main-content ${
                     !showComments ? "full-width" : ""
@@ -422,28 +422,39 @@ const VideoPlayer = ({ src }) => {
                 />
 
                 {/* Play and Draw buttons */}
-                <div className="additional-controls">
-                    <button className="mainButton" onClick={togglePlayPause}>
-                        {isPlaying ? "Pause" : "Play"}
-                    </button>
+                <div className="-mt-20">
+                    <div className="additional-controls">
+                        <button
+                            className="mainButton"
+                            onClick={togglePlayPause}
+                        >
+                            {isPlaying ? "Pause" : "Play"}
+                        </button>
+                        <button
+                            className={`mainButton ${
+                                isDrawMode ? "active" : ""
+                            }`}
+                            onClick={toggleDrawMode}
+                        >
+                            {isDrawMode ? "Disable Draw" : "Enable Draw"}
+                        </button>
+                    </div>
+
+                    {/* Button to toggle comments */}
                     <button
-                        className={`mainButton ${isDrawMode ? "active" : ""}`}
-                        onClick={toggleDrawMode}
+                        onClick={() => setShowComments(!showComments)}
+                        className="toggle-comments-btn"
                     >
-                        {isDrawMode ? "Disable Draw" : "Enable Draw"}
+                        {showComments ? "Hide Comments" : "Show Comments"}
                     </button>
                 </div>
-
-                {/* Button to toggle comments */}
-                <button
-                    onClick={() => setShowComments(!showComments)}
-                    className="toggle-comments-btn"
-                >
-                    {showComments ? "Hide Comments" : "Show Comments"}
-                </button>
             </div>
 
-            <div className={`comment-section ${!showComments ? "hidden" : ""}`}>
+            <div
+                className={`comment-section bg-[#d9d9d9] ${
+                    !showComments ? "hidden" : ""
+                }`}
+            >
                 <CommentSection
                     comment={comment}
                     setComment={setComment}

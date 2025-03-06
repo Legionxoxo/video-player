@@ -10,7 +10,6 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tailwindcss/postcss": "^4.0.10",
     "@tailwindcss/vite": "^4.0.10",
     "axios": "^1.7.9",
     "lucide-react": "^0.475.0",

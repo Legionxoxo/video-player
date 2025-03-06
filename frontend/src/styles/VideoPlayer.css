@@ -18,7 +18,7 @@
 .video-wrapper {
     position: relative;
     flex: 1;
-    min-height: 0;
+    margin-top: 80px;
 }
 
 .video {
@@ -28,10 +28,9 @@
 }
 
 .comment-section {
-    flex: 0 0 30%;
-    width: 30%;
+    flex: 0 0 24%;
+    width: 24%;
     border-left: 1px solid #333;
-    background-color: black;
     overflow-y: auto;
     transition: width 0.3s ease;
 }
@@ -84,140 +83,4 @@
         0,
         0.8
     ); /* Orange color for active state */
-}
-
-.commentList {
-    padding: 16px;
-}
-
-.comment {
-    display: flex;
-    flex-direction: column;
-    margin: 24px 16px;
-    padding: 8px;
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    color: white;
-}
-
-.commentContent {
-    margin-bottom: 8px;
-}
-
-.commentText {
-    display: block;
-    font-weight: bold;
-}
-
-.commentName {
-    display: block;
-    font-weight: bold;
-    color: #fff;
-}
-
-.commentEmail {
-    display: block;
-    font-size: 0.9rem;
-    color: #ccc;
-    margin-bottom: 8px;
-}
-
-.commentTimestamp {
-    display: block;
-    font-size: 0.8rem;
-    color: #aaa;
-    margin-top: 8px;
-}
-
-.commentActions {
-    display: flex;
-    align-items: center;
-    margin-top: 8px;
-    cursor: pointer;
-}
-
-.resolveAction {
-    display: flex;
-    align-items: center;
-    margin-left: 8px;
-}
-
-.icon {
-    width: 20px;
-    height: 20px;
-    color: #fff;
-    margin-right: 4px;
-}
-
-.resolveText {
-    font-size: 0.9rem;
-    color: #ff9800; /* Orange color for resolve text */
-}
-
-.resolvedText {
-    font-size: 0.9rem;
-    color: #4caf50; /* Green color for resolved text */
-}
-
-.shapeCoordinates,
-.timestamp {
-    display: block;
-    font-size: 0.9rem;
-    color: #ccc;
-}
-
-.replyBox {
-    margin-top: 8px;
-    display: flex;
-    align-items: center;
-}
-
-.replyInput {
-    flex: 1;
-    padding: 4px;
-    margin-right: 8px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-}
-
-.replyButton {
-    padding: 4px 8px;
-    background-color: rgba(255, 255, 255, 0.1);
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.replyButton:hover {
-    background-color: rgba(255, 255, 255, 0.2);
-}
-
-.reply {
-    margin: 16px 0 16px 75px;
-    padding: 8px;
-    background-color: rgba(255, 255, 255, 0.05);
-    border-radius: 5px;
-    color: white;
-    display: flex;
-    flex-direction: column;
-}
-
-.reply .commentName {
-    font-weight: bold;
-    color: #fff;
-}
-
-.reply .commentText {
-    margin-top: 4px;
-    font-size: 0.9rem;
-}
-
-.reply .commentTimestamp {
-    font-size: 0.8rem;
-    color: #aaa;
-    margin-top: 4px;
 }

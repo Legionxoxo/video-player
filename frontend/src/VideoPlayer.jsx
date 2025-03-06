@@ -6,6 +6,7 @@ import ProgressBar from "./ProgressBar";
 import CommentSection from "./CommentSection";
 import DrawingCanvas from "./DrawingCanvas";
 import "./styles/VideoPlayer.css";
+import { Pause, Pen, PenOff, Play, Square } from "lucide-react";
 
 const VideoPlayer = ({ src }) => {
     const videoRef = useRef(null);
@@ -369,14 +370,18 @@ const VideoPlayer = ({ src }) => {
         }
     };
 
+    const toggleComments = () => {
+        setShowComments(!showComments);
+    };
+
     return (
-        <div className="video-player-container overflow-hidden">
+        <div className="flex h-screen bg-[#181818] overflow-hidden">
             <div
-                className={`video-main-content ${
-                    !showComments ? "full-width" : ""
+                className={`flex-2 flex flex-col transition-width duration-300 ease-in-out ${
+                    !showComments ? "flex-1" : "w-3/4"
                 }`}
             >
-                <div className="video-wrapper">
+                <div className="relative flex-1 flex items-center justify-center bg-black mt-28">
                     <video
                         ref={videoRef}
                         src={src}
@@ -404,55 +409,65 @@ const VideoPlayer = ({ src }) => {
                         adjustVolume={adjustVolume}
                         playbackRate={playbackRate}
                         changeSpeed={changeSpeed}
+                        showComments={showComments}
+                        toggleComments={toggleComments}
                     />
+
+                    {/* Container for progress bar and speed control */}
+                    <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center">
+                        <ProgressBar
+                            progressRef={progressRef}
+                            currentTime={currentTime}
+                            duration={duration}
+                            timelineSelection={timelineSelection}
+                            handleProgressChange={handleProgressChange}
+                            handleTimelineStart={handleTimelineStart}
+                            handleTimelineMove={handleTimelineMove}
+                            handleTimelineEnd={handleTimelineEnd}
+                            formatTime={formatTime}
+                            previewFrames={previewFrames}
+                            videoRef={videoRef}
+                            showComments={showComments}
+                            style={{
+                                width: showComments ? "50%" : "80%",
+                            }}
+                        />
+                        {/* Add speed control here if needed */}
+                    </div>
                 </div>
 
-                <ProgressBar
-                    progressRef={progressRef}
-                    currentTime={currentTime}
-                    duration={duration}
-                    timelineSelection={timelineSelection}
-                    handleProgressChange={handleProgressChange}
-                    handleTimelineStart={handleTimelineStart}
-                    handleTimelineMove={handleTimelineMove}
-                    handleTimelineEnd={handleTimelineEnd}
-                    formatTime={formatTime}
-                    previewFrames={previewFrames}
-                    videoRef={videoRef}
-                />
-
                 {/* Play and Draw buttons */}
-                <div className="-mt-20">
-                    <div className="additional-controls">
-                        <button
-                            className="mainButton"
-                            onClick={togglePlayPause}
-                        >
-                            {isPlaying ? "Pause" : "Play"}
-                        </button>
-                        <button
-                            className={`mainButton ${
-                                isDrawMode ? "active" : ""
-                            }`}
-                            onClick={toggleDrawMode}
-                        >
-                            {isDrawMode ? "Disable Draw" : "Enable Draw"}
-                        </button>
+                <div className="my-10">
+                    <div className="flex items-center justify-center rounded-full">
+                        <div className="bg-[#5A5A5A] rounded-full p-4 flex items-center justify-center gap-x-6 ">
+                            <button
+                                className="bg-white rounded-full p-2"
+                                onClick={togglePlayPause}
+                            >
+                                {isPlaying ? (
+                                    <Pause className="cursor-pointer w-8 h-8 text-[#969696] " />
+                                ) : (
+                                    <Play className="cursor-pointer w-8 h-8 text-[#969696] " />
+                                )}
+                            </button>
+                            <button
+                                className={` ${isDrawMode ? "active" : ""}`}
+                                onClick={toggleDrawMode}
+                            >
+                                {isDrawMode ? (
+                                    <PenOff className="cursor-pointer w-7 h-7" />
+                                ) : (
+                                    <Pen className="cursor-pointer w-7 h-7" />
+                                )}
+                            </button>
+                        </div>
                     </div>
-
-                    {/* Button to toggle comments */}
-                    <button
-                        onClick={() => setShowComments(!showComments)}
-                        className="toggle-comments-btn"
-                    >
-                        {showComments ? "Hide Comments" : "Show Comments"}
-                    </button>
                 </div>
             </div>
 
             <div
                 className={`comment-section bg-[#d9d9d9] ${
-                    !showComments ? "hidden" : ""
+                    !showComments ? "hidden" : "w-1/4"
                 }`}
             >
                 <CommentSection

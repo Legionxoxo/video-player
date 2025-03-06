@@ -7,6 +7,8 @@ import {
     Volume2,
     VolumeX,
     Pencil,
+    Maximize,
+    Minimize,
 } from "lucide-react";
 
 const Controls = ({
@@ -20,15 +22,21 @@ const Controls = ({
     adjustVolume,
     playbackRate,
     changeSpeed,
+    showComments,
+    toggleComments,
 }) => {
     const [showSpeedOptions, setShowSpeedOptions] = useState(false);
 
     const getVolumeIcon = () => {
-        if (isMuted || volume === 0) return <VolumeX className="icon" />;
-        if (volume > 0 && volume <= 0.25) return <Volume className="icon" />;
-        if (volume > 0.25 && volume <= 0.5) return <Volume1 className="icon" />;
-        if (volume > 0.5 && volume <= 0.75) return <Volume2 className="icon" />;
-        return <Volume2 className="icon" />;
+        if (isMuted || volume === 0)
+            return <VolumeX className="h-8 w-8 text-[#969696]" />;
+        if (volume > 0 && volume <= 0.25)
+            return <Volume className="h-8 w-8 text-[#969696]" />;
+        if (volume > 0.25 && volume <= 0.5)
+            return <Volume1 className="h-8 w-8 text-[#969696]" />;
+        if (volume > 0.5 && volume <= 0.75)
+            return <Volume2 className="h-8 w-8 text-[#969696]" />;
+        return <Volume2 className="h-8 w-8 text-[#969696]" />;
     };
 
     const toggleSpeedOptions = () => {
@@ -62,10 +70,18 @@ const Controls = ({
                         type="range"
                         min="0"
                         max="1"
-                        step="0.1"
+                        step="0.01"
                         value={volume}
-                        onChange={adjustVolume}
-                        className="volumeSlider"
+                        onChange={(e) => {
+                            adjustVolume(e);
+                            e.target.style.setProperty(
+                                "--volume-level",
+                                `${e.target.value * 100}%`
+                            );
+                        }}
+                        className={`volumeSlider ${
+                            showComments ? "vertical" : ""
+                        }`}
                     />
                 </div>
 
@@ -95,6 +111,17 @@ const Controls = ({
                         </div>
                     )}
                 </div>
+
+                <button
+                    onClick={toggleComments}
+                    className="toggleCommentsButton"
+                >
+                    {showComments ? (
+                        <Minimize className="icon cursor-pointer" />
+                    ) : (
+                        <Maximize className="icon cursor-pointer" />
+                    )}
+                </button>
             </div>
         </div>
     );

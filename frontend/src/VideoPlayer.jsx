@@ -30,6 +30,7 @@ const VideoPlayer = ({ src }) => {
     const [isDrawMode, setIsDrawMode] = useState(false);
     const [previewFrames, setPreviewFrames] = useState([]);
     const [showComments, setShowComments] = useState(true);
+    const [inputBoxPosition, setInputBoxPosition] = useState(null);
 
     const getPointerPosition = (e, rect) => {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -150,6 +151,7 @@ const VideoPlayer = ({ src }) => {
         const point = getPointerPosition(e, rect);
         setStartPoint(point);
         setEndPoint(point);
+        setInputBoxPosition(null);
     };
 
     const draw = (e) => {
@@ -178,6 +180,11 @@ const VideoPlayer = ({ src }) => {
     const endDrawing = () => {
         if (!isDrawMode) return;
         setIsDrawing(false);
+
+        setInputBoxPosition({
+            x: endPoint.x + 10,
+            y: endPoint.y,
+        });
     };
 
     const formatTime = (timestamp) => {
@@ -315,6 +322,8 @@ const VideoPlayer = ({ src }) => {
             const canvas = canvasRef.current;
             const ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            setInputBoxPosition(null);
         }
         setIsDrawMode(false);
         setIsDrawing(false);
@@ -397,6 +406,43 @@ const VideoPlayer = ({ src }) => {
                         draw={draw}
                         endDrawing={endDrawing}
                     />
+
+                    {inputBoxPosition && (
+                        <div
+                            style={{
+                                position: "absolute",
+                                left: inputBoxPosition.x,
+                                top: inputBoxPosition.y,
+                                backgroundColor: "white",
+                                padding: "10px",
+                                borderRadius: "5px",
+                                boxShadow: "0 0 10px rgba(0,0,0,0.5)",
+                                zIndex: 1000,
+                            }}
+                        >
+                            <form onSubmit={handleSubmitComment}>
+                                <input
+                                    type="text"
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === " ") {
+                                            e.stopPropagation();
+                                        }
+                                    }}
+                                    placeholder="Add a comment..."
+                                    className="border-1 border-black rounded-md px-4 py-2 text-[#000000]"
+                                    autoFocus
+                                />
+                                <button
+                                    type="submit"
+                                    className="text-white bg-blue-500 text-lg font-medium px-4 py-2 rounded-md mt-3 cursor-pointer ml-2 hover:bg-blue-600"
+                                >
+                                    Submit
+                                </button>
+                            </form>
+                        </div>
+                    )}
 
                     <VideoControls
                         isPlaying={isPlaying}

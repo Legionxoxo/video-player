@@ -72,7 +72,7 @@ const CommentSection = ({
 
     return (
         <>
-            <div className="flex flex-row mx-5 items-center mt-2">
+            {/* <div className="flex flex-row mx-5 items-center mt-2">
                 <form onSubmit={handleSubmitComment} className="">
                     <input
                         type="text"
@@ -89,7 +89,7 @@ const CommentSection = ({
                         Submit
                     </button>
                 </form>
-            </div>
+            </div> */}
 
             <div className=" flex flex-col gap-3">
                 {comments.map((comment, index) => (
@@ -177,6 +177,11 @@ const CommentSection = ({
                                     onChange={(e) =>
                                         handleReplyChange(index, e.target.value)
                                     }
+                                    onKeyDown={(e) => {
+                                        if (e.key === " ") {
+                                            e.stopPropagation(); // Prevent space from triggering video play/pause
+                                        }
+                                    }}
                                     placeholder="Add a reply..."
                                     className="border-1 border-gray-300 rounded-md px-3 py-2 text-black mt-3 ml-5"
                                 />

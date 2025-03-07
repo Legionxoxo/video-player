@@ -482,3 +482,12 @@
     border-radius: 4px;
     cursor: pointer;
 }
+
+button.active {
+    background-color: white;
+    color: #969696;
+}
+
+button:not(.active) {
+    background-color: transparent;
+}

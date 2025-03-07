@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import MiniPlayer from "./MiniPlayer";
-import CommentStorage from "./CommentStorage";
-import { MessageCircle, Check, CheckCheck } from "lucide-react";
+import { MessageCircle, Check, CheckCheck, X } from "lucide-react";
 
 const formatDate = (date) => {
     return date
@@ -71,31 +70,33 @@ const CommentSection = ({
     };
 
     return (
-        <>
-            {/* <div className="flex flex-row mx-5 items-center mt-2">
-                <form onSubmit={handleSubmitComment} className="">
-                    <input
-                        type="text"
-                        value={comment}
-                        onChange={(e) => setComment(e.target.value)}
-                        onKeyDown={handleInputKeyDown}
-                        placeholder="Add a comment..."
-                        className="border-1 border-black rounded-md px-4 py-2 text-[#000000]"
-                    />
-                    <button
-                        type="submit"
-                        className="text-white bg-blue-500 text-lg font-medium px-4 py-2 rounded-md mt-3 cursor-pointer ml-2 hover:bg-blue-600"
-                    >
-                        Submit
-                    </button>
-                </form>
-            </div> */}
+        <div className="flex flex-col gap-3">
+            <div className="flex items-center justify-between gap-x-2">
+                <h1 className="text-black text-3xl font-bold ml-5 mt-4">
+                    Comments
+                </h1>
+                {/* <button
+                    onClick={() => setShowComments(false)}
+                    className="mt-4 mr-4"
+                >
+                    <X className="w-8 h-8 cursor-pointer text-[#969696]" />
+                </button> */}
+            </div>
 
-            <div className=" flex flex-col gap-3">
-                {comments.map((comment, index) => (
+            <div className="border-b border-zinc-500 w-full" />
+            {comments.length === 0 ? (
+                <div className="flex justify-center items-center h-full">
+                    <p className="text-center text-gray-500 mt-4 px-6 py-6 text-lg">
+                        All your conversation will appear here. You can select
+                        the area to highlight, select the timeline, and you are
+                        good to go.
+                    </p>
+                </div>
+            ) : (
+                comments.map((comment, index) => (
                     <div
                         key={index}
-                        className={`flex flex-col justify-between border rounded-xl  bg-[#f6f6f6] m-5 ${
+                        className={`flex flex-col justify-between border rounded-xl bg-[#f6f6f6] m-5 ${
                             comment.isReply
                                 ? "ml-20 -mt-3 rounded-xl text-white flex flex-col"
                                 : ""
@@ -194,9 +195,9 @@ const CommentSection = ({
                             </div>
                         )}
                     </div>
-                ))}
-            </div>
-        </>
+                ))
+            )}
+        </div>
     );
 };
 

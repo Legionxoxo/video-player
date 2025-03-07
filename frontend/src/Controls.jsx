@@ -55,10 +55,10 @@ const Controls = ({
 
             <button
                 onClick={toggleDrawMode}
-                className={`drawButton ${isDrawMode ? "active" : ""}`}
+                className={`drawButton ${isDrawMode ? "" : ""}`}
                 title={isDrawMode ? "Disable drawing" : "Enable drawing"}
             >
-                <Pencil className="icon" />
+                {/*  <Pencil className="icon" /> */}
             </button>
 
             <div className="rightControls">

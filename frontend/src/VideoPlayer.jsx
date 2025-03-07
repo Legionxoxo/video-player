@@ -6,7 +6,7 @@ import ProgressBar from "./ProgressBar";
 import CommentSection from "./CommentSection";
 import DrawingCanvas from "./DrawingCanvas";
 import "./styles/VideoPlayer.css";
-import { Pause, Pen, PenOff, Play, Square } from "lucide-react";
+import { Pause, Pen, PenOff, Play } from "lucide-react";
 
 const VideoPlayer = ({ src }) => {
     const videoRef = useRef(null);
@@ -31,6 +31,7 @@ const VideoPlayer = ({ src }) => {
     const [previewFrames, setPreviewFrames] = useState([]);
     const [showComments, setShowComments] = useState(true);
     const [inputBoxPosition, setInputBoxPosition] = useState(null);
+    const [activeTool, setActiveTool] = useState("play");
 
     const getPointerPosition = (e, rect) => {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -86,8 +87,11 @@ const VideoPlayer = ({ src }) => {
             const video = videoRef.current;
             if (video.paused) {
                 await video.play();
+                setIsPlaying(true);
+                setActiveTool("play");
             } else {
                 video.pause();
+                setIsPlaying(false);
             }
         } catch (error) {
             console.error("Error toggling play/pause:", error);
@@ -181,9 +185,15 @@ const VideoPlayer = ({ src }) => {
         if (!isDrawMode) return;
         setIsDrawing(false);
 
+        // Set the position for the input box next to the drawn region
+        const canvas = canvasRef.current;
+        const rect = canvas.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.bottom - 280; // 10px below the canvas
+
         setInputBoxPosition({
-            x: endPoint.x + 10,
-            y: endPoint.y,
+            x: centerX,
+            y: centerY,
         });
     };
 
@@ -240,11 +250,18 @@ const VideoPlayer = ({ src }) => {
     };
 
     const toggleDrawMode = () => {
-        setIsDrawMode(!isDrawMode);
+        const newDrawMode = !isDrawMode;
+        setIsDrawMode(newDrawMode);
         clearCanvas();
-        if (isDrawMode && videoRef.current.paused) {
-            videoRef.current.play();
-            setIsPlaying(true);
+
+        if (!newDrawMode) {
+            setInputBoxPosition(null); // Close the input box when draw mode is disabled
+        } else {
+            setActiveTool("draw"); // Set active tool to draw
+            if (videoRef.current && !videoRef.current.paused) {
+                videoRef.current.pause(); // Pause the video if it's playing
+                setIsPlaying(false);
+            }
         }
     };
 
@@ -407,13 +424,15 @@ const VideoPlayer = ({ src }) => {
                         endDrawing={endDrawing}
                     />
 
+                    {/* Comment input form */}
                     {inputBoxPosition && (
                         <div
                             style={{
                                 position: "absolute",
                                 left: inputBoxPosition.x,
                                 top: inputBoxPosition.y,
-                                backgroundColor: "white",
+                                transform: "translateX(-50%)",
+                                backgroundColor: "#FFFFFF",
                                 padding: "10px",
                                 borderRadius: "5px",
                                 boxShadow: "0 0 10px rgba(0,0,0,0.5)",
@@ -421,7 +440,31 @@ const VideoPlayer = ({ src }) => {
                             }}
                         >
                             <form onSubmit={handleSubmitComment}>
-                                <input
+                                <div className="flex items-center justify-between ml-2">
+                                    <h1 className="text-black ml-2">Comment</h1>
+                                    <div className="flex items-center justify-between gap-x-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setComment("");
+                                                setInputBoxPosition(null);
+                                            }}
+                                            className="text-[#000000] cursor-pointer"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <div className="bg-[#FF9F40] px-3 py-1  cursor-pointer rounded-md ml-3 mr-3 my-1">
+                                            <button
+                                                type="submit"
+                                                className="text-[#000000] cursor-pointer"
+                                            >
+                                                Reply
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <textarea
                                     type="text"
                                     value={comment}
                                     onChange={(e) => setComment(e.target.value)}
@@ -431,15 +474,9 @@ const VideoPlayer = ({ src }) => {
                                         }
                                     }}
                                     placeholder="Add a comment..."
-                                    className="border-1 border-black rounded-md px-4 py-2 text-[#000000]"
+                                    className="border-2 border-[#D9D9D9] rounded-lg px-4 py-4 text-[#000000] w-[440px] h-[100px] mx-3 my-1 focus:outline-none focus:border-blue-500 placeholder-[#969696]"
                                     autoFocus
                                 />
-                                <button
-                                    type="submit"
-                                    className="text-white bg-blue-500 text-lg font-medium px-4 py-2 rounded-md mt-3 cursor-pointer ml-2 hover:bg-blue-600"
-                                >
-                                    Submit
-                                </button>
                             </form>
                         </div>
                     )}
@@ -478,7 +515,6 @@ const VideoPlayer = ({ src }) => {
                                 width: showComments ? "50%" : "80%",
                             }}
                         />
-                        {/* Add speed control here if needed */}
                     </div>
                 </div>
 
@@ -487,7 +523,9 @@ const VideoPlayer = ({ src }) => {
                     <div className="flex items-center justify-center rounded-full">
                         <div className="bg-[#5A5A5A] rounded-full p-4 flex items-center justify-center gap-x-6 ">
                             <button
-                                className="bg-white rounded-full p-2"
+                                className={`bg-white rounded-full p-2 ${
+                                    activeTool === "play" ? "active" : ""
+                                }`}
                                 onClick={togglePlayPause}
                             >
                                 {isPlaying ? (
@@ -497,7 +535,9 @@ const VideoPlayer = ({ src }) => {
                                 )}
                             </button>
                             <button
-                                className={` ${isDrawMode ? "active" : ""}`}
+                                className={`rounded-full p-2 ${
+                                    activeTool === "draw" ? "active" : ""
+                                }`}
                                 onClick={toggleDrawMode}
                             >
                                 {isDrawMode ? (

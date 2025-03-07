@@ -49,7 +49,7 @@ const Controls = ({
                 {isPlaying ? (
                     <Pause className="icon ml-8 mt-1" />
                 ) : (
-                    <Play className="icon ml-8 mt-1" />
+                    <Play fill="white" className="icon ml-8 mt-1" />
                 )}
             </button>
 

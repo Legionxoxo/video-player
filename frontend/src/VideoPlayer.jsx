@@ -549,9 +549,15 @@ const VideoPlayer = ({ src }) => {
                                 onClick={togglePlayPause}
                             >
                                 {isPlaying ? (
-                                    <Play className="cursor-pointer w-8 h-8 text-[#969696] " />
+                                    <Play
+                                        fill="#969696"
+                                        className="cursor-pointer w-8 h-8 text-[#969696] "
+                                    />
                                 ) : (
-                                    <Play className="cursor-pointer w-8 h-8 text-[#969696] " />
+                                    <Play
+                                        /* fill="#969696" */
+                                        className="cursor-pointer w-8 h-8 text-[#969696] "
+                                    />
                                 )}
                             </button>
                             <button

@@ -165,27 +165,47 @@ const CommentSection = ({
                             </div>
                         )}
                         {replies[index] !== undefined && (
-                            <div className="flex flex-row mb-4">
-                                <input
-                                    type="text"
-                                    value={replies[index]}
-                                    onChange={(e) =>
-                                        handleReplyChange(index, e.target.value)
-                                    }
-                                    onKeyDown={(e) => {
-                                        if (e.key === " ") {
-                                            e.stopPropagation(); // Prevent space from triggering video play/pause
+                            <div className="flex flex-col mb-4">
+                                <div className="flex flex-row gap-x-2">
+                                    <textarea
+                                        type="text"
+                                        value={replies[index]}
+                                        onChange={(e) =>
+                                            handleReplyChange(
+                                                index,
+                                                e.target.value
+                                            )
                                         }
-                                    }}
-                                    placeholder="Add a reply..."
-                                    className="border-1 border-gray-300 rounded-md px-3 py-2 text-black mt-3 ml-5"
-                                />
-                                <button
-                                    onClick={() => handleReplySubmit(index)}
-                                    className="text-[#000000] text-lg font-medium px-4 py-2 rounded-md mt-3 cursor-pointer ml-2"
-                                >
-                                    Reply
-                                </button>
+                                        onKeyDown={(e) => {
+                                            if (e.key === " ") {
+                                                e.stopPropagation(); // Prevent space from triggering video play/pause
+                                            }
+                                        }}
+                                        placeholder="Add a reply..."
+                                        className="border-2 border-[#969696] bg-[#f6f6f6] focus:outline-none rounded-md px-4 py-2 text-[#000000] placeholder-[#969696] mt-3 ml-5 w-full mx-3"
+                                    />
+                                </div>
+                                <div className="flex flex-row">
+                                    <div className="bg-[#FF9F40] cursor-pointer rounded-md mx-5 mt-4">
+                                        <button
+                                            onClick={() =>
+                                                handleReplySubmit(index)
+                                            }
+                                            type="submit"
+                                            className="text-[#000000] cursor-pointer text-center px-4 py-2"
+                                        >
+                                            Reply
+                                        </button>
+                                    </div>
+                                    <button
+                                        onClick={() =>
+                                            handleReplyChange(index, undefined)
+                                        }
+                                        className="text-[#000000] text-lg font-medium px-4 py-2 rounded-md mt-3 cursor-pointer ml-2"
+                                    >
+                                        Cancel
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </div>

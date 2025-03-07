@@ -35,7 +35,7 @@
     left: 0;
     width: 100%;
     height: 100%;
-    cursor: crosshair;
+    cursor: url(../public/pencil.svg), crosshair;
     pointer-events: none;
     z-index: 2;
     touch-action: none;

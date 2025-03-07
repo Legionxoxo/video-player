@@ -47,9 +47,9 @@ const Controls = ({
         <div className="controls">
             <button onClick={togglePlayPause} className="playPauseButton">
                 {isPlaying ? (
-                    <Pause className="icon" />
+                    <Pause className="icon ml-8 mt-1" />
                 ) : (
-                    <Play className="icon" />
+                    <Play className="icon ml-8 mt-1" />
                 )}
             </button>
 
@@ -62,7 +62,7 @@ const Controls = ({
             </button>
 
             <div className="rightControls">
-                <div className="volumeControls">
+                <div className="volumeControls relative z-10">
                     <button onClick={toggleMute} className="muteButton">
                         {getVolumeIcon()}
                     </button>
@@ -73,15 +73,18 @@ const Controls = ({
                         step="0.01"
                         value={volume}
                         onChange={(e) => {
-                            adjustVolume(e);
+                            adjustVolume(e.target.value);
                             e.target.style.setProperty(
                                 "--volume-level",
                                 `${e.target.value * 100}%`
                             );
                         }}
-                        className={`volumeSlider ${
-                            showComments ? "vertical" : ""
-                        }`}
+                        className="volumeSlider w-24 h-1 bg-gray-300 rounded-lg appearance-none cursor-pointer"
+                        style={{
+                            background: `linear-gradient(to right, #007bff ${
+                                volume * 100
+                            }%, #ccc ${volume * 100}%)`,
+                        }}
                     />
                 </div>
 
@@ -117,9 +120,9 @@ const Controls = ({
                     className="toggleCommentsButton"
                 >
                     {showComments ? (
-                        <Minimize className="icon cursor-pointer" />
+                        <Maximize className="icon cursor-pointer mr-8 -ml-2" />
                     ) : (
-                        <Maximize className="icon cursor-pointer" />
+                        <Minimize className="icon cursor-pointer mr-8 -ml-2" />
                     )}
                 </button>
             </div>

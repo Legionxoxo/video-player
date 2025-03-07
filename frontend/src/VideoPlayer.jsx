@@ -6,7 +6,7 @@ import ProgressBar from "./ProgressBar";
 import CommentSection from "./CommentSection";
 import DrawingCanvas from "./DrawingCanvas";
 import "./styles/VideoPlayer.css";
-import { Pause, Pen, PenOff, Play } from "lucide-react";
+import { Pause, Pen, PenOff, Play, Square, SquareDashed } from "lucide-react";
 
 const VideoPlayer = ({ src }) => {
     const videoRef = useRef(null);
@@ -426,59 +426,79 @@ const VideoPlayer = ({ src }) => {
 
                     {/* Comment input form */}
                     {inputBoxPosition && (
-                        <div
-                            style={{
-                                position: "absolute",
-                                left: inputBoxPosition.x,
-                                top: inputBoxPosition.y,
-                                transform: "translateX(-50%)",
-                                backgroundColor: "#FFFFFF",
-                                padding: "10px",
-                                borderRadius: "5px",
-                                boxShadow: "0 0 10px rgba(0,0,0,0.5)",
-                                zIndex: 1000,
-                            }}
-                        >
-                            <form onSubmit={handleSubmitComment}>
-                                <div className="flex items-center justify-between ml-2">
-                                    <h1 className="text-black ml-2">Comment</h1>
-                                    <div className="flex items-center justify-between gap-x-2">
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setComment("");
-                                                setInputBoxPosition(null);
-                                            }}
-                                            className="text-[#000000] cursor-pointer"
-                                        >
-                                            Cancel
-                                        </button>
-                                        <div className="bg-[#FF9F40] px-3 py-1  cursor-pointer rounded-md ml-3 mr-3 my-1">
+                        <>
+                            <div
+                                style={{
+                                    position: "fixed",
+                                    top: 0,
+                                    bottom: 0,
+                                    left: 0,
+                                    right: 0,
+                                    zIndex: 999,
+                                }}
+                                onClick={() => {
+                                    setComment("");
+                                    setInputBoxPosition(null);
+                                }}
+                            />
+                            <div
+                                style={{
+                                    position: "absolute",
+                                    left: inputBoxPosition.x,
+                                    top: inputBoxPosition.y,
+                                    transform: "translateX(-50%)",
+                                    backgroundColor: "#FFFFFF",
+                                    padding: "10px",
+                                    borderRadius: "5px",
+                                    boxShadow: "0 0 10px rgba(0,0,0,0.5)",
+                                    zIndex: 1000,
+                                }}
+                            >
+                                <form onSubmit={handleSubmitComment}>
+                                    <div className="flex items-center justify-between ml-2">
+                                        <h1 className="text-black ml-2">
+                                            Comment
+                                        </h1>
+                                        <div className="flex items-center justify-between gap-x-2">
                                             <button
-                                                type="submit"
+                                                type="button"
+                                                onClick={() => {
+                                                    setComment("");
+                                                    setInputBoxPosition(null);
+                                                }}
                                                 className="text-[#000000] cursor-pointer"
                                             >
-                                                Reply
+                                                Cancel
                                             </button>
+                                            <div className="bg-[#FF9F40] px-3 py-1  cursor-pointer rounded-md ml-3 mr-3 my-1">
+                                                <button
+                                                    type="submit"
+                                                    className="text-[#000000] cursor-pointer"
+                                                >
+                                                    Reply
+                                                </button>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <textarea
-                                    type="text"
-                                    value={comment}
-                                    onChange={(e) => setComment(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === " ") {
-                                            e.stopPropagation();
+                                    <textarea
+                                        type="text"
+                                        value={comment}
+                                        onChange={(e) =>
+                                            setComment(e.target.value)
                                         }
-                                    }}
-                                    placeholder="Add a comment..."
-                                    className="border-2 border-[#D9D9D9] rounded-lg px-4 py-4 text-[#000000] w-[440px] h-[100px] mx-3 my-1 focus:outline-none focus:border-blue-500 placeholder-[#969696]"
-                                    autoFocus
-                                />
-                            </form>
-                        </div>
+                                        onKeyDown={(e) => {
+                                            if (e.key === " ") {
+                                                e.stopPropagation();
+                                            }
+                                        }}
+                                        placeholder="Add a comment..."
+                                        className="border-2 border-[#D9D9D9] rounded-lg px-4 py-4 text-[#000000] w-[440px] h-[100px] mx-3 my-1 focus:outline-none focus:border-blue-500 placeholder-[#969696]"
+                                        autoFocus
+                                    />
+                                </form>
+                            </div>
+                        </>
                     )}
 
                     <VideoControls
@@ -529,7 +549,7 @@ const VideoPlayer = ({ src }) => {
                                 onClick={togglePlayPause}
                             >
                                 {isPlaying ? (
-                                    <Pause className="cursor-pointer w-8 h-8 text-[#969696] " />
+                                    <Play className="cursor-pointer w-8 h-8 text-[#969696] " />
                                 ) : (
                                     <Play className="cursor-pointer w-8 h-8 text-[#969696] " />
                                 )}
@@ -541,9 +561,9 @@ const VideoPlayer = ({ src }) => {
                                 onClick={toggleDrawMode}
                             >
                                 {isDrawMode ? (
-                                    <PenOff className="cursor-pointer w-7 h-7" />
+                                    <Square className="cursor-pointer w-7 h-7" />
                                 ) : (
-                                    <Pen className="cursor-pointer w-7 h-7" />
+                                    <SquareDashed className="cursor-pointer w-7 h-7" />
                                 )}
                             </button>
                         </div>

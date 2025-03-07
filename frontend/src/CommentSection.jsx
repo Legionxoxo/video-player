@@ -71,27 +71,21 @@ const CommentSection = ({
 
     return (
         <div className="flex flex-col gap-3">
-            <div className="flex items-center justify-between gap-x-2">
-                <h1 className="text-black text-3xl font-bold ml-5 mt-4">
-                    Comments
-                </h1>
-                {/* <button
-                    onClick={() => setShowComments(false)}
-                    className="mt-4 mr-4"
-                >
-                    <X className="w-8 h-8 cursor-pointer text-[#969696]" />
-                </button> */}
-            </div>
-
-            <div className="border-b border-zinc-500 w-full" />
             {comments.length === 0 ? (
-                <div className="flex justify-center items-center h-full">
-                    <p className="text-center text-gray-500 mt-4 px-6 py-6 text-lg">
-                        All your conversation will appear here. You can select
-                        the area to highlight, select the timeline, and you are
-                        good to go.
-                    </p>
-                </div>
+                <>
+                    <h1 className="text-[#969696] text-3xl font-bold ml-5 mt-4 text-center">
+                        Comments
+                    </h1>
+                    <div className="border-b border-zinc-500 w-full" />
+
+                    <div className="flex justify-center items-center h-full">
+                        <p className="text-center text-gray-500 mt-4 px-6 py-6 text-lg">
+                            All your conversation will appear here. You can
+                            select the area to highlight, select the timeline,
+                            and you are good to go.
+                        </p>
+                    </div>
+                </>
             ) : (
                 comments.map((comment, index) => (
                     <div

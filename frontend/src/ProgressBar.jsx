@@ -88,13 +88,12 @@ const ProgressBar = ({
     };
 
     return (
-        <div className="progressBarContainer">
+        <div className=" flex justify-center items-center z-15">
             <div
                 ref={progressRef}
-                className="progressBar"
-                style={{
-                    width: showComments ? "60%" : "100%",
-                }}
+                className={`relative cursor-pointer bg-gray-400 h-1 my-[38px] mr-60 ${
+                    showComments ? "w-[1000px] " : "w-[1400px]"
+                }`}
                 onClick={handleClick}
                 onMouseDown={handleStart}
                 onTouchStart={handleStart}

@@ -92,19 +92,14 @@
 
 .progressBarContainer {
     display: flex;
-    justify-content: center;
+    justify-content: start;
     align-items: center;
-    width: 100%;
-    max-width: 1200px;
-    padding: 20px 0;
     touch-action: none;
-    margin: 0 auto 10px auto;
-    z-index: 15;
 }
 
 .progressBar {
     position: relative;
-    height: 8px;
+    height: 4px;
     background: #969696;
     border-radius: 4px;
     cursor: pointer;
@@ -112,8 +107,6 @@
     -webkit-user-select: none;
     user-select: none;
     z-index: 16;
-    width: 100%;
-    max-width: 80%;
 }
 
 .progress {
@@ -245,36 +238,34 @@
 
 .volumeSlider {
     width: 100px;
-    height: 8px;
-    -webkit-appearance: none;
-    background: linear-gradient(to right, #007bff 0%, #007bff 100%);
-    border-radius: 4px;
-    transition: background 0.2s ease;
+    appearance: none;
+    background: linear-gradient(
+        to right,
+        #007bff var(--volume-level, 100%),
+        #ccc var(--volume-level, 100%)
+    );
+    height: 5px;
+    border-radius: 5px;
     outline: none;
+    transition: background 0.3s ease;
     cursor: pointer;
 }
 
 .volumeSlider::-webkit-slider-thumb {
-    -webkit-appearance: none;
-    width: 12px;
-    height: 12px;
-    background: #fff;
+    appearance: none;
+    width: 15px;
+    height: 15px;
+    background: #007bff;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-    position: relative;
-    z-index: 1;
 }
 
 .volumeSlider::-moz-range-thumb {
-    width: 12px;
-    height: 12px;
-    background: #fff;
+    width: 15px;
+    height: 15px;
+    background: #ff9f40;
     border-radius: 50%;
     cursor: pointer;
-    box-shadow: 0 0 2px rgba(0, 0, 0, 0.5);
-    position: relative;
-    z-index: 1;
 }
 
 .commentContent {

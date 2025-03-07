@@ -32,6 +32,8 @@ const VideoPlayer = ({ src }) => {
     const [showComments, setShowComments] = useState(true);
     const [inputBoxPosition, setInputBoxPosition] = useState(null);
     const [activeTool, setActiveTool] = useState("play");
+    const [draggingPoint, setDraggingPoint] = useState(null);
+    const [inputBoxVisible, setInputBoxVisible] = useState(false);
 
     const getPointerPosition = (e, rect) => {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -195,6 +197,18 @@ const VideoPlayer = ({ src }) => {
             x: centerX,
             y: centerY,
         });
+
+        // Auto-select 5 seconds on the timeline
+        const video = videoRef.current;
+        const start = video.currentTime;
+        const end = Math.min(start + 5, video.duration); // Ensure end does not exceed video duration
+        setTimelineSelection({ start, end });
+
+        // Generate preview frames for the selected 5 seconds
+        generatePreviewFrames(start, end);
+
+        // Show the input box after drawing
+        setInputBoxVisible(true);
     };
 
     const formatTime = (timestamp) => {
@@ -206,26 +220,46 @@ const VideoPlayer = ({ src }) => {
     const handleTimelineStart = (e) => {
         if (!progressRef.current) return;
 
-        setTimelineSelection({
-            start: e.time,
-            end: e.time,
-        });
+        const time = e.time;
+        const start = timelineSelection.start;
+        const end = timelineSelection.end;
+
+        // Close the input box when dragging starts
+        setInputBoxVisible(false);
+
+        // Determine if the user clicked near the start or end point
+        const startDistance = Math.abs(time - start);
+        const endDistance = Math.abs(time - end);
+
+        if (startDistance < endDistance) {
+            setDraggingPoint("start");
+            setTimelineSelection({ start: time, end });
+        } else {
+            setDraggingPoint("end");
+            setTimelineSelection({ start, end: time });
+        }
     };
 
     const handleTimelineMove = (e) => {
-        if (!progressRef.current || timelineSelection.start === null) return;
+        if (!progressRef.current || draggingPoint === null) return;
 
-        setTimelineSelection((prev) => ({
-            ...prev,
-            end: e.time,
-        }));
+        const time = e.time;
+
+        if (draggingPoint === "start") {
+            setTimelineSelection((prev) => ({
+                ...prev,
+                start: time,
+            }));
+        } else if (draggingPoint === "end") {
+            setTimelineSelection((prev) => ({
+                ...prev,
+                end: time,
+            }));
+        }
     };
 
     const handleTimelineEnd = (e) => {
-        if (!timelineSelection.start || !timelineSelection.end) {
-            setTimelineSelection({ start: null, end: null });
-            return;
-        }
+        if (draggingPoint === null) return; // Only proceed if a point is being dragged
 
         const start = Math.min(timelineSelection.start, timelineSelection.end);
         const end = Math.max(timelineSelection.start, timelineSelection.end);
@@ -235,6 +269,9 @@ const VideoPlayer = ({ src }) => {
         } else {
             generatePreviewFrames(start, end);
         }
+
+        // Show the input box again when dragging ends
+        setInputBoxVisible(true);
     };
 
     const clearCanvas = () => {
@@ -341,6 +378,10 @@ const VideoPlayer = ({ src }) => {
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
             setInputBoxPosition(null);
+
+            // Reset start and end points after adding a comment
+            setTimelineSelection({ start: null, end: null });
+            setInputBoxVisible(false); // Hide the input box after submitting the comment
         }
         setIsDrawMode(false);
         setIsDrawing(false);
@@ -384,6 +425,7 @@ const VideoPlayer = ({ src }) => {
                 });
             }
 
+            console.log("Generated preview frames:", frames); // Debugging line
             setPreviewFrames(frames);
 
             // Restore video state
@@ -425,80 +467,60 @@ const VideoPlayer = ({ src }) => {
                     />
 
                     {/* Comment input form */}
-                    {inputBoxPosition && (
-                        <>
-                            <div
-                                style={{
-                                    position: "fixed",
-                                    top: 0,
-                                    bottom: 0,
-                                    left: 0,
-                                    right: 0,
-                                    zIndex: 999,
-                                }}
-                                onClick={() => {
-                                    setComment("");
-                                    setInputBoxPosition(null);
-                                }}
-                            />
-                            <div
-                                style={{
-                                    position: "absolute",
-                                    left: inputBoxPosition.x,
-                                    top: inputBoxPosition.y,
-                                    transform: "translateX(-50%)",
-                                    backgroundColor: "#FFFFFF",
-                                    padding: "10px",
-                                    borderRadius: "5px",
-                                    boxShadow: "0 0 10px rgba(0,0,0,0.5)",
-                                    zIndex: 1000,
-                                }}
-                            >
-                                <form onSubmit={handleSubmitComment}>
-                                    <div className="flex items-center justify-between ml-2">
-                                        <h1 className="text-black ml-2">
-                                            Comment
-                                        </h1>
-                                        <div className="flex items-center justify-between gap-x-2">
+                    {inputBoxVisible && (
+                        <div
+                            style={{
+                                position: "absolute",
+                                left: inputBoxPosition.x,
+                                top: inputBoxPosition.y,
+                                transform: "translateX(-50%)",
+                                backgroundColor: "#FFFFFF",
+                                padding: "10px",
+                                borderRadius: "5px",
+                                boxShadow: "0 0 10px rgba(0,0,0,0.5)",
+                                zIndex: 1000,
+                            }}
+                        >
+                            <form onSubmit={handleSubmitComment}>
+                                <div className="flex items-center justify-between ml-2">
+                                    <h1 className="text-black ml-2">Comment</h1>
+                                    <div className="flex items-center justify-between gap-x-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setComment("");
+                                                setInputBoxPosition(null);
+                                            }}
+                                            className="text-[#000000] cursor-pointer"
+                                        >
+                                            Cancel
+                                        </button>
+                                        <div className="bg-[#FF9F40] px-3 py-1  cursor-pointer rounded-md ml-3 mr-3 my-1">
                                             <button
-                                                type="button"
-                                                onClick={() => {
-                                                    setComment("");
-                                                    setInputBoxPosition(null);
-                                                }}
+                                                type="submit"
                                                 className="text-[#000000] cursor-pointer"
                                             >
-                                                Cancel
+                                                Reply
                                             </button>
-                                            <div className="bg-[#FF9F40] px-3 py-1  cursor-pointer rounded-md ml-3 mr-3 my-1">
-                                                <button
-                                                    type="submit"
-                                                    className="text-[#000000] cursor-pointer"
-                                                >
-                                                    Reply
-                                                </button>
-                                            </div>
                                         </div>
                                     </div>
+                                </div>
 
-                                    <textarea
-                                        type="text"
-                                        value={comment}
-                                        onChange={(e) =>
-                                            setComment(e.target.value)
+                                <textarea
+                                    type="text"
+                                    value={comment}
+                                    onChange={(e) => setComment(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === " ") {
+                                            e.stopPropagation();
                                         }
-                                        onKeyDown={(e) => {
-                                            if (e.key === " ") {
-                                                e.stopPropagation();
-                                            }
-                                        }}
-                                        placeholder="Add a comment..."
-                                        className="border-2 border-[#D9D9D9] rounded-lg px-4 py-4 text-[#000000] w-[440px] h-[100px] mx-3 my-1 focus:outline-none focus:border-blue-500 placeholder-[#969696]"
-                                        autoFocus
-                                    />
-                                </form>
-                            </div>
-                        </>
+                                    }}
+                                    placeholder="Add a comment..."
+                                    className="border-2 border-[#D9D9D9] rounded-lg px-4 py-4 text-[#000000] w-[440px] h-[100px] mx-3 my-1 focus:outline-none focus:border-blue-500 placeholder-[#969696]"
+                                    autoFocus
+                                />
+                            </form>
+                        </div>
                     )}
 
                     <VideoControls

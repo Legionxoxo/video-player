@@ -149,9 +149,12 @@
 .timelineMarker {
     position: absolute;
     top: 0;
-    width: 4px;
-    height: 100%;
-    background: white;
+    width: 16px;
+    height: 16px;
+    bottom: -10px;
+    border-width: 3px;
+    border-radius: 50%;
+    background-color: white;
     transform: translateX(-50%);
 }
 

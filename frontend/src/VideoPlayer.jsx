@@ -229,60 +229,98 @@ const VideoPlayer = ({ src }) => {
     };
 
     const handleTimelineStart = (e) => {
-        if (!progressRef.current) return;
+        if (!progressRef.current || !isDrawMode) return;
 
-        const time = e.time;
-        const start = timelineSelection.start;
-        const end = timelineSelection.end;
+        const progressBar = progressRef.current;
+        const rect = progressBar.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const time = (x / rect.width) * duration;
+
+        // Ensure video is paused in draw mode
+        if (videoRef.current && !videoRef.current.paused) {
+            videoRef.current.pause();
+            setIsPlaying(false);
+        }
 
         // Close the input box when dragging starts
         setInputBoxVisible(false);
 
-        // Determine if the user clicked near the start or end point
-        const startDistance = Math.abs(time - start);
-        const endDistance = Math.abs(time - end);
+        // Check if click is near existing start or end points
+        const pixelsPerSecond = rect.width / duration;
+        const tolerance = 10; // pixels
 
-        if (startDistance < endDistance) {
-            setDraggingPoint("start");
-            setTimelineSelection({ start: time, end });
-        } else {
-            setDraggingPoint("end");
-            setTimelineSelection({ start, end: time });
+        const startX = (timelineSelection.start / duration) * rect.width;
+        const endX = (timelineSelection.end / duration) * rect.width;
+        const clickX = x;
+
+        const distanceToStart = Math.abs(clickX - startX);
+        const distanceToEnd = Math.abs(clickX - endX);
+
+        if (distanceToStart <= tolerance || distanceToEnd <= tolerance) {
+            if (distanceToStart < distanceToEnd) {
+                setDraggingPoint("start");
+                setTimelineSelection((prev) => ({ ...prev, start: time }));
+            } else {
+                setDraggingPoint("end");
+                setTimelineSelection((prev) => ({ ...prev, end: time }));
+            }
         }
+
+        e.stopPropagation();
+        e.preventDefault();
     };
 
     const handleTimelineMove = (e) => {
-        if (!progressRef.current || draggingPoint === null) return;
+        if (!progressRef.current || draggingPoint === null || !isDrawMode)
+            return;
 
-        const time = e.time;
+        const progressBar = progressRef.current;
+        const rect = progressBar.getBoundingClientRect();
+        const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
+        const time = (x / rect.width) * duration;
 
         if (draggingPoint === "start") {
             setTimelineSelection((prev) => ({
                 ...prev,
-                start: time,
+                start: Math.min(time, prev.end),
             }));
         } else if (draggingPoint === "end") {
             setTimelineSelection((prev) => ({
                 ...prev,
-                end: time,
+                end: Math.max(time, prev.start),
             }));
         }
+
+        // Generate preview frames while dragging
+        const start = Math.min(timelineSelection.start, timelineSelection.end);
+        const end = Math.max(timelineSelection.start, timelineSelection.end);
+        generatePreviewFrames(start, end);
+
+        e.stopPropagation();
+        e.preventDefault();
     };
 
     const handleTimelineEnd = (e) => {
-        if (draggingPoint === null) return; // Only proceed if a point is being dragged
+        if (draggingPoint === null || !isDrawMode) return;
 
         const start = Math.min(timelineSelection.start, timelineSelection.end);
         const end = Math.max(timelineSelection.start, timelineSelection.end);
 
+        // Only reset if the selection is too small
         if (Math.abs(end - start) < 0.1) {
             setTimelineSelection({ start: null, end: null });
+            setInputBoxVisible(false);
         } else {
             generatePreviewFrames(start, end);
+            // Show the input box after timeline selection
+            setInputBoxVisible(true);
         }
 
-        // Show the input box again when dragging ends
-        setInputBoxVisible(true);
+        // Reset dragging point
+        setDraggingPoint(null);
+
+        e.stopPropagation();
+        e.preventDefault();
     };
 
     const clearCanvas = () => {
@@ -405,45 +443,89 @@ const VideoPlayer = ({ src }) => {
         if (!videoRef.current) return;
 
         const video = videoRef.current;
-        const wasPlaying = !video.paused;
-        const currentTime = video.currentTime;
+        const originalTime = video.currentTime;
 
         try {
-            if (wasPlaying) {
-                await video.pause();
-            }
-
             const frames = [];
-            const numFrames = 5;
-            const interval = (end - start) / (numFrames - 1);
+            const duration = end - start;
+            const numFrames = Math.ceil(duration); // One frame per second
+            const interval = 1; // 1 second interval
+
+            // Create a temporary video element for seeking
+            const tempVideo = document.createElement("video");
+            tempVideo.src = video.src;
+            tempVideo.preload = "auto";
+
+            await new Promise((resolve) => {
+                tempVideo.onloadedmetadata = () => {
+                    tempVideo.currentTime = start;
+                    resolve();
+                };
+            });
 
             for (let i = 0; i < numFrames; i++) {
                 const frameTime = start + i * interval;
-                video.currentTime = frameTime;
+                if (frameTime > end) break; // Don't generate frames beyond end time
+
+                tempVideo.currentTime = frameTime;
 
                 await new Promise((resolve) => {
-                    video.onseeked = resolve;
-                });
+                    tempVideo.onseeked = () => {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = 160; // Preview frame width
+                        canvas.height = 90; // Preview frame height
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(
+                            tempVideo,
+                            0,
+                            0,
+                            canvas.width,
+                            canvas.height
+                        );
 
-                const canvas = document.createElement("canvas");
-                canvas.width = 160;
-                canvas.height = 90;
-                const ctx = canvas.getContext("2d");
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-                frames.push({
-                    time: frameTime,
-                    src: canvas.toDataURL("image/jpeg", 0.7),
+                        frames.push({
+                            time: frameTime,
+                            src: canvas.toDataURL("image/jpeg", 0.7),
+                        });
+                        resolve();
+                    };
                 });
             }
 
-            console.log("Generated preview frames:", frames); // Debugging line
+            // Add one final frame at the end time if it wasn't captured
+            if (
+                Math.floor(end) !==
+                Math.floor(start + (numFrames - 1) * interval)
+            ) {
+                tempVideo.currentTime = end;
+                await new Promise((resolve) => {
+                    tempVideo.onseeked = () => {
+                        const canvas = document.createElement("canvas");
+                        canvas.width = 160;
+                        canvas.height = 90;
+                        const ctx = canvas.getContext("2d");
+                        ctx.drawImage(
+                            tempVideo,
+                            0,
+                            0,
+                            canvas.width,
+                            canvas.height
+                        );
+
+                        frames.push({
+                            time: end,
+                            src: canvas.toDataURL("image/jpeg", 0.7),
+                        });
+                        resolve();
+                    };
+                });
+            }
+
             setPreviewFrames(frames);
 
-            // Restore video state
-            video.currentTime = currentTime;
-            if (wasPlaying) {
-                await video.play();
+            // Keep the main video at its original position in draw mode
+            if (isDrawMode) {
+                video.currentTime = originalTime;
             }
         } catch (error) {
             console.error("Error generating preview frames:", error);

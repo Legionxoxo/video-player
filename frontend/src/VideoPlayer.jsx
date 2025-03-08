@@ -6,7 +6,24 @@ import ProgressBar from "./ProgressBar";
 import CommentSection from "./CommentSection";
 import DrawingCanvas from "./DrawingCanvas";
 import "./styles/VideoPlayer.css";
-import { Pause, Pen, PenOff, Play, Square, SquareDashed } from "lucide-react";
+import { Play, Square } from "lucide-react";
+import {
+    handleTimelineStart,
+    handleTimelineMove,
+    handleTimelineEnd,
+} from "./videoFunctions/timelineHandlers";
+import {
+    getPointerPosition,
+    startDrawing,
+    draw,
+    endDrawing,
+} from "./videoFunctions/drawingHandlers";
+import {
+    togglePlayPause,
+    changeSpeed,
+    toggleMute,
+    adjustVolume,
+} from "./videoFunctions/playbackControls";
 
 const VideoPlayer = ({ src }) => {
     const videoRef = useRef(null);
@@ -97,24 +114,14 @@ const VideoPlayer = ({ src }) => {
         }
     };
 
-    const togglePlayPause = async () => {
-        try {
-            const video = videoRef.current;
-            if (video.paused) {
-                await video.play();
-            } else {
-                video.pause();
-                setIsPlaying(false);
-            }
-        } catch (error) {
-            console.error("Error toggling play/pause:", error);
-        }
+    const togglePlayPauseWrapper = () => {
+        togglePlayPause(videoRef, setIsPlaying);
     };
 
     const handleKeyPress = (e) => {
         if (e.code === "Space") {
             e.preventDefault();
-            togglePlayPause();
+            togglePlayPauseWrapper();
         }
     };
 
@@ -151,75 +158,35 @@ const VideoPlayer = ({ src }) => {
         videoRef.current.currentTime = newTime;
     };
 
-    const startDrawing = (e) => {
-        if (!isDrawMode) return;
-        setIsDrawing(true);
-
-        if (videoRef.current && !videoRef.current.paused) {
-            videoRef.current.pause();
-            setIsPlaying(false);
-        }
-
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        const rect = canvas.getBoundingClientRect();
-        const point = getPointerPosition(e, rect);
-        setStartPoint(point);
-        setEndPoint(point);
-        setInputBoxPosition(null);
-    };
-
-    const draw = (e) => {
-        if (!isDrawing || !isDrawMode) return;
-
-        const canvas = canvasRef.current;
-        const ctx = canvas.getContext("2d");
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-        const rect = canvas.getBoundingClientRect();
-        const currentPoint = getPointerPosition(e, rect);
-        setEndPoint(currentPoint);
-
-        ctx.beginPath();
-        ctx.strokeStyle = "orange";
-        ctx.lineWidth = 3;
-        ctx.rect(
-            startPoint.x,
-            startPoint.y,
-            currentPoint.x - startPoint.x,
-            currentPoint.y - startPoint.y
+    const startDrawingWrapper = (e) => {
+        startDrawing(
+            e,
+            isDrawMode,
+            setIsDrawing,
+            videoRef,
+            setIsPlaying,
+            canvasRef,
+            setStartPoint,
+            setEndPoint,
+            setInputBoxPosition
         );
-        ctx.stroke();
     };
 
-    const endDrawing = () => {
-        if (!isDrawMode) return;
-        setIsDrawing(false);
+    const drawWrapper = (e) => {
+        draw(e, isDrawing, isDrawMode, canvasRef, startPoint, setEndPoint);
+    };
 
-        // Set the position for the input box next to the drawn region
-        const canvas = canvasRef.current;
-        const rect = canvas.getBoundingClientRect();
-        const centerX = rect.left + rect.width / 2;
-        const centerY = rect.bottom - 280; // 10px below the canvas
-
-        setInputBoxPosition({
-            x: centerX,
-            y: centerY,
-        });
-
-        // Auto-select 5 seconds on the timeline
-        const video = videoRef.current;
-        const start = video.currentTime;
-        const end = Math.min(start + 5, video.duration); // Ensure end does not exceed video duration
-        setTimelineSelection({ start, end });
-
-        // Generate preview frames for the selected 5 seconds
-        generatePreviewFrames(start, end);
-
-        // Show the input box after drawing
-        setInputBoxVisible(true);
+    const endDrawingWrapper = () => {
+        endDrawing(
+            isDrawMode,
+            setIsDrawing,
+            canvasRef,
+            setInputBoxPosition,
+            videoRef,
+            setTimelineSelection,
+            generatePreviewFrames,
+            setInputBoxVisible
+        );
     };
 
     const formatTime = (timestamp) => {
@@ -228,61 +195,29 @@ const VideoPlayer = ({ src }) => {
         return `${minutes}:${String(seconds).padStart(2, "0")}`;
     };
 
-    const handleTimelineStart = (e) => {
-        if (!progressRef.current) return;
-
-        const time = e.time;
-        const start = timelineSelection.start;
-        const end = timelineSelection.end;
-
-        // Close the input box when dragging starts
-        setInputBoxVisible(false);
-
-        // Determine if the user clicked near the start or end point
-        const startDistance = Math.abs(time - start);
-        const endDistance = Math.abs(time - end);
-
-        if (startDistance < endDistance) {
-            setDraggingPoint("start");
-            setTimelineSelection({ start: time, end });
-        } else {
-            setDraggingPoint("end");
-            setTimelineSelection({ start, end: time });
-        }
+    const handleTimelineStartWrapper = (e) => {
+        handleTimelineStart(
+            e,
+            progressRef,
+            timelineSelection,
+            setInputBoxVisible,
+            setDraggingPoint,
+            setTimelineSelection
+        );
     };
 
-    const handleTimelineMove = (e) => {
-        if (!progressRef.current || draggingPoint === null) return;
-
-        const time = e.time;
-
-        if (draggingPoint === "start") {
-            setTimelineSelection((prev) => ({
-                ...prev,
-                start: time,
-            }));
-        } else if (draggingPoint === "end") {
-            setTimelineSelection((prev) => ({
-                ...prev,
-                end: time,
-            }));
-        }
+    const handleTimelineMoveWrapper = (e) => {
+        handleTimelineMove(e, progressRef, draggingPoint, setTimelineSelection);
     };
 
-    const handleTimelineEnd = (e) => {
-        if (draggingPoint === null) return; // Only proceed if a point is being dragged
-
-        const start = Math.min(timelineSelection.start, timelineSelection.end);
-        const end = Math.max(timelineSelection.start, timelineSelection.end);
-
-        if (Math.abs(end - start) < 0.1) {
-            setTimelineSelection({ start: null, end: null });
-        } else {
-            generatePreviewFrames(start, end);
-        }
-
-        // Show the input box again when dragging ends
-        setInputBoxVisible(true);
+    const handleTimelineEndWrapper = () => {
+        handleTimelineEnd(
+            draggingPoint,
+            timelineSelection,
+            setTimelineSelection,
+            generatePreviewFrames,
+            setInputBoxVisible
+        );
     };
 
     const clearCanvas = () => {
@@ -473,16 +408,16 @@ const VideoPlayer = ({ src }) => {
                         ref={videoRef}
                         src={src}
                         className="video"
-                        onClick={togglePlayPause}
+                        onClick={togglePlayPauseWrapper}
                         playsInline
                     />
 
                     <DrawingCanvas
                         canvasRef={canvasRef}
                         isDrawMode={isDrawMode}
-                        startDrawing={startDrawing}
-                        draw={draw}
-                        endDrawing={endDrawing}
+                        startDrawing={startDrawingWrapper}
+                        draw={drawWrapper}
+                        endDrawing={endDrawingWrapper}
                     />
 
                     {/* Comment input form */}
@@ -541,7 +476,7 @@ const VideoPlayer = ({ src }) => {
 
                     <VideoControls
                         isPlaying={isPlaying}
-                        togglePlayPause={togglePlayPause}
+                        togglePlayPause={togglePlayPauseWrapper}
                         toggleDrawMode={toggleDrawMode}
                         isDrawMode={isDrawMode}
                         isMuted={isMuted}
@@ -562,9 +497,9 @@ const VideoPlayer = ({ src }) => {
                             duration={duration}
                             timelineSelection={timelineSelection}
                             handleProgressChange={handleProgressChange}
-                            handleTimelineStart={handleTimelineStart}
-                            handleTimelineMove={handleTimelineMove}
-                            handleTimelineEnd={handleTimelineEnd}
+                            handleTimelineStart={handleTimelineStartWrapper}
+                            handleTimelineMove={handleTimelineMoveWrapper}
+                            handleTimelineEnd={handleTimelineEndWrapper}
                             formatTime={formatTime}
                             previewFrames={previewFrames}
                             videoRef={videoRef}

@@ -91,7 +91,7 @@ const ProgressBar = ({
         <div className="absolute bottom-[38px] flex justify-center items-center">
             <div
                 ref={progressRef}
-                className={`relative cursor-pointer bg-gray-400 h-1 mr-60 ${
+                className={`progressBar relative cursor-pointer bg-gray-400 h-1 mr-60 ${
                     showComments ? "w-[1000px] " : "w-[1400px] "
                 }`}
                 onClick={handleClick}
@@ -213,11 +213,7 @@ const ProgressBar = ({
                                     (timelineSelection.start / duration) * 100
                                 }%`,
                             }}
-                        >
-                            <span className="timeTooltip">
-                                {formatTime(timelineSelection.start)}
-                            </span>
-                        </div>
+                        ></div>
                         <div
                             className="timelineMarker end"
                             style={{
@@ -225,11 +221,7 @@ const ProgressBar = ({
                                     (timelineSelection.end / duration) * 100
                                 }%`,
                             }}
-                        >
-                            <span className="timeTooltip">
-                                {formatTime(timelineSelection.end)}
-                            </span>
-                        </div>
+                        ></div>
                     </>
                 )}
             </div>

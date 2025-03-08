@@ -84,18 +84,24 @@ const VideoPlayer = ({ src }) => {
         };
     }, []);
 
+    const EnablePlayPause = async () => {
+        if (activeTool !== "play") {
+            setActiveTool("play");
+            setIsDrawMode(false);
+            clearCanvas();
+            setIsDrawMode(false);
+            clearCanvas();
+            setInputBoxVisible(false);
+            setPreviewFrames([]);
+            setTimelineSelection({ start: null, end: null });
+        }
+    };
+
     const togglePlayPause = async () => {
         try {
             const video = videoRef.current;
             if (video.paused) {
                 await video.play();
-                setIsPlaying(true);
-                setActiveTool("play");
-                setIsDrawMode(false);
-                clearCanvas();
-                setInputBoxVisible(false);
-                setPreviewFrames([]);
-                setTimelineSelection({ start: null, end: null });
             } else {
                 video.pause();
                 setIsPlaying(false);
@@ -303,6 +309,7 @@ const VideoPlayer = ({ src }) => {
                 setIsPlaying(false);
             }
         } else {
+            setActiveTool("play");
             setInputBoxPosition(null);
         }
     };
@@ -450,8 +457,8 @@ const VideoPlayer = ({ src }) => {
     // Cancel button logic
     const handleCancelComment = () => {
         setComment("");
-        setInputBoxPosition(null); // Safely hide the input box
-        setInputBoxVisible(false); // Ensure the input box is not visible
+        setInputBoxPosition(null);
+        setInputBoxVisible(false);
     };
 
     return (
@@ -574,7 +581,7 @@ const VideoPlayer = ({ src }) => {
                                 className={`bg-white rounded-full p-2 ${
                                     activeTool === "play" ? "active" : ""
                                 }`}
-                                onClick={togglePlayPause}
+                                onClick={EnablePlayPause}
                             >
                                 <Play
                                     fill="#969696"

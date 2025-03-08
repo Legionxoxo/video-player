@@ -51,6 +51,8 @@ const VideoPlayer = ({ src }) => {
     const [activeTool, setActiveTool] = useState("play");
     const [draggingPoint, setDraggingPoint] = useState(null);
     const [inputBoxVisible, setInputBoxVisible] = useState(false);
+    const [commentSubmitted, setCommentSubmitted] = useState(false);
+    const [shapeDrawn, setShapeDrawn] = useState(false);
 
     const getPointerPosition = (e, rect) => {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -106,8 +108,6 @@ const VideoPlayer = ({ src }) => {
             setActiveTool("play");
             setIsDrawMode(false);
             clearCanvas();
-            setIsDrawMode(false);
-            clearCanvas();
             setInputBoxVisible(false);
             setPreviewFrames([]);
             setTimelineSelection({ start: null, end: null });
@@ -159,17 +159,20 @@ const VideoPlayer = ({ src }) => {
     };
 
     const startDrawingWrapper = (e) => {
-        startDrawing(
-            e,
-            isDrawMode,
-            setIsDrawing,
-            videoRef,
-            setIsPlaying,
-            canvasRef,
-            setStartPoint,
-            setEndPoint,
-            setInputBoxPosition
-        );
+        // Check if the drawing should start (e.g., mouse down or touch start)
+        if (e.type === "mousedown" || e.type === "touchstart") {
+            startDrawing(
+                e,
+                isDrawMode,
+                setIsDrawing,
+                videoRef,
+                setIsPlaying,
+                canvasRef,
+                setStartPoint,
+                setEndPoint,
+                setInputBoxPosition
+            );
+        }
     };
 
     const drawWrapper = (e) => {
@@ -177,16 +180,31 @@ const VideoPlayer = ({ src }) => {
     };
 
     const endDrawingWrapper = () => {
-        endDrawing(
-            isDrawMode,
-            setIsDrawing,
-            canvasRef,
-            setInputBoxPosition,
-            videoRef,
-            setTimelineSelection,
-            generatePreviewFrames,
-            setInputBoxVisible
-        );
+        if (isDrawing) {
+            endDrawing(
+                isDrawMode,
+                setIsDrawing,
+                canvasRef,
+                setInputBoxPosition,
+                videoRef,
+                setTimelineSelection,
+                generatePreviewFrames,
+                setInputBoxVisible
+            );
+
+            // Mark that a shape has been drawn
+            setShapeDrawn(true);
+
+            // Open the comment box if a shape has been drawn
+            if (shapeDrawn) {
+                const currentTime = videoRef.current.currentTime;
+                setTimelineSelection({
+                    start: currentTime,
+                    end: currentTime + 5,
+                });
+                setInputBoxVisible(true);
+            }
+        }
     };
 
     const formatTime = (timestamp) => {
@@ -320,20 +338,25 @@ const VideoPlayer = ({ src }) => {
             setComment("");
             setTimelineSelection({ start: null, end: null });
 
-            const canvas = canvasRef.current;
-            const ctx = canvas.getContext("2d");
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // Clear the canvas after adding a comment
+            clearCanvas();
 
+            // Close the comment input box
             setInputBoxPosition(null);
+            setInputBoxVisible(false);
 
             // Reset start and end points after adding a comment
-            setTimelineSelection({ start: null, end: null });
-            setInputBoxVisible(false); // Hide the input box after submitting the comment
+            setStartPoint({ x: 0, y: 0 });
+            setEndPoint({ x: 0, y: 0 });
+
+            // Mark comment as submitted
+            setCommentSubmitted(true);
+
+            // Reset shapeDrawn state
+            setShapeDrawn(false);
         }
-        setIsDrawMode(false);
+        // Allow drawing to continue
         setIsDrawing(false);
-        setStartPoint({ x: 0, y: 0 });
-        setEndPoint({ x: 0, y: 0 });
     };
 
     const generatePreviewFrames = async (start, end) => {
@@ -396,8 +419,32 @@ const VideoPlayer = ({ src }) => {
         setInputBoxVisible(false);
     };
 
+    // Prevent event propagation on the comment input box
+    const handleCommentInputClick = (e) => {
+        e.stopPropagation(); // Stop the event from bubbling up to parent elements
+    };
+
     return (
         <div className="flex h-screen bg-[#181818] overflow-hidden">
+            {/* Overlay for closing the comment input box */}
+            {inputBoxVisible && (
+                <div
+                    style={{
+                        position: "fixed",
+                        top: 0,
+                        bottom: 0,
+                        left: 0,
+                        right: 0,
+                        zIndex: 999, // Ensure it's behind the comment box
+                        backgroundColor: "transparent",
+                    }}
+                    onClick={() => {
+                        setInputBoxVisible(false);
+                        setInputBoxPosition(null);
+                    }}
+                />
+            )}
+
             <div
                 className={`flex-2 flex flex-col transition-width duration-300 ease-in-out ${
                     !showComments ? "flex-1" : "w-3/4"
@@ -434,6 +481,7 @@ const VideoPlayer = ({ src }) => {
                                 boxShadow: "0 0 10px rgba(0,0,0,0.5)",
                                 zIndex: 1000,
                             }}
+                            onClick={handleCommentInputClick} // Prevent event propagation
                         >
                             <form onSubmit={handleSubmitComment}>
                                 <div className="flex items-center justify-between ml-2">

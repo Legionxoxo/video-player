@@ -91,6 +91,11 @@ const VideoPlayer = ({ src }) => {
                 await video.play();
                 setIsPlaying(true);
                 setActiveTool("play");
+                setIsDrawMode(false);
+                clearCanvas();
+                setInputBoxVisible(false);
+                setPreviewFrames([]);
+                setTimelineSelection({ start: null, end: null });
             } else {
                 video.pause();
                 setIsPlaying(false);
@@ -291,14 +296,14 @@ const VideoPlayer = ({ src }) => {
         setIsDrawMode(newDrawMode);
         clearCanvas();
 
-        if (!newDrawMode) {
-            setInputBoxPosition(null); // Close the input box when draw mode is disabled
-        } else {
-            setActiveTool("draw"); // Set active tool to draw
+        if (newDrawMode) {
+            setActiveTool("draw");
             if (videoRef.current && !videoRef.current.paused) {
-                videoRef.current.pause(); // Pause the video if it's playing
+                videoRef.current.pause();
                 setIsPlaying(false);
             }
+        } else {
+            setInputBoxPosition(null);
         }
     };
 
@@ -442,6 +447,13 @@ const VideoPlayer = ({ src }) => {
         setShowComments(!showComments);
     };
 
+    // Cancel button logic
+    const handleCancelComment = () => {
+        setComment("");
+        setInputBoxPosition(null); // Safely hide the input box
+        setInputBoxVisible(false); // Ensure the input box is not visible
+    };
+
     return (
         <div className="flex h-screen bg-[#181818] overflow-hidden">
             <div
@@ -467,7 +479,7 @@ const VideoPlayer = ({ src }) => {
                     />
 
                     {/* Comment input form */}
-                    {inputBoxVisible && (
+                    {inputBoxVisible && inputBoxPosition && (
                         <div
                             style={{
                                 position: "absolute",
@@ -487,15 +499,12 @@ const VideoPlayer = ({ src }) => {
                                     <div className="flex items-center justify-between gap-x-2">
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                setComment("");
-                                                setInputBoxPosition(null);
-                                            }}
+                                            onClick={handleCancelComment}
                                             className="text-[#000000] cursor-pointer"
                                         >
                                             Cancel
                                         </button>
-                                        <div className="bg-[#FF9F40] px-3 py-1  cursor-pointer rounded-md ml-3 mr-3 my-1">
+                                        <div className="bg-[#FF9F40] px-3 py-1 cursor-pointer rounded-md ml-3 mr-3 my-1">
                                             <button
                                                 type="submit"
                                                 className="text-[#000000] cursor-pointer"
@@ -570,17 +579,10 @@ const VideoPlayer = ({ src }) => {
                                 }`}
                                 onClick={togglePlayPause}
                             >
-                                {isPlaying ? (
-                                    <Play
-                                        fill="#969696"
-                                        className="cursor-pointer w-8 h-8 text-[#969696] "
-                                    />
-                                ) : (
-                                    <Play
-                                        /* fill="#969696" */
-                                        className="cursor-pointer w-8 h-8 text-[#969696] "
-                                    />
-                                )}
+                                <Play
+                                    fill="#969696"
+                                    className="cursor-pointer w-8 h-8 text-[#969696] "
+                                />
                             </button>
                             <button
                                 className={`rounded-full p-2 ${
@@ -588,11 +590,7 @@ const VideoPlayer = ({ src }) => {
                                 }`}
                                 onClick={toggleDrawMode}
                             >
-                                {isDrawMode ? (
-                                    <Square className="cursor-pointer w-7 h-7" />
-                                ) : (
-                                    <SquareDashed className="cursor-pointer w-7 h-7" />
-                                )}
+                                <Square className="cursor-pointer w-7 h-7" />
                             </button>
                         </div>
                     </div>

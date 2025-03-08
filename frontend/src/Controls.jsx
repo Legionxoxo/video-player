@@ -45,11 +45,11 @@ const Controls = ({
 
     return (
         <div className="controls">
-            <button onClick={togglePlayPause} className="playPauseButton">
+            <button onClick={togglePlayPause} className="playPauseButton mt-px">
                 {isPlaying ? (
-                    <Pause className="icon ml-8 mt-1" />
+                    <Pause className="icon ml-12 " />
                 ) : (
-                    <Play fill="white" className="icon ml-8 mt-1" />
+                    <Play fill="white" className="icon ml-12" />
                 )}
             </button>
 
@@ -73,7 +73,7 @@ const Controls = ({
                         step="0.01"
                         value={volume}
                         onChange={(e) => {
-                            adjustVolume(e.target.value);
+                            adjustVolume(e);
                             e.target.style.setProperty(
                                 "--volume-level",
                                 `${e.target.value * 100}%`

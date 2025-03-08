@@ -548,7 +548,7 @@ const VideoPlayer = ({ src }) => {
                     />
 
                     {/* Container for progress bar and speed control */}
-                    <div className="absolute bottom-0 left-0 right-0 flex flex-col items-center">
+                    <div className=" flex flex-col items-center z-15">
                         <ProgressBar
                             progressRef={progressRef}
                             currentTime={currentTime}
@@ -562,9 +562,6 @@ const VideoPlayer = ({ src }) => {
                             previewFrames={previewFrames}
                             videoRef={videoRef}
                             showComments={showComments}
-                            style={{
-                                width: showComments ? "50%" : "80%",
-                            }}
                         />
                     </div>
                 </div>

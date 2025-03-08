@@ -88,11 +88,11 @@ const ProgressBar = ({
     };
 
     return (
-        <div className=" flex justify-center items-center z-15">
+        <div className="absolute bottom-[38px] flex justify-center items-center">
             <div
                 ref={progressRef}
-                className={`relative cursor-pointer bg-gray-400 h-1 my-[38px] mr-60 ${
-                    showComments ? "w-[1000px] " : "w-[1400px]"
+                className={`relative cursor-pointer bg-gray-400 h-1 mr-60 ${
+                    showComments ? "w-[1000px] " : "w-[1400px] "
                 }`}
                 onClick={handleClick}
                 onMouseDown={handleStart}
@@ -236,5 +236,4 @@ const ProgressBar = ({
         </div>
     );
 };
-
 export default ProgressBar;

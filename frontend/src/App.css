@@ -71,7 +71,6 @@
 .playPauseButton {
     background: transparent;
     border: none;
-    padding: 8px;
     cursor: pointer;
     color: white;
     display: flex;

@@ -39,15 +39,11 @@ const ProgressBar = ({
 
     const handleStart = (e) => {
         e.preventDefault();
-        const time = getTimeFromEvent(e);
-        if (time !== null) {
-            setIsDragging(true);
-            handleTimelineStart({
-                clientX: e.touches ? e.touches[0].clientX : e.clientX,
-                time,
-            });
-            handleSeek(e);
-        }
+        const rect = progressRef.current.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+
+        setIsDragging(true);
+        handleTimelineStart(e);
     };
 
     const handleMove = useCallback(
@@ -61,10 +57,7 @@ const ProgressBar = ({
 
                 if (isDragging) {
                     e.preventDefault();
-                    handleTimelineMove({
-                        clientX: e.touches ? e.touches[0].clientX : e.clientX,
-                        time,
-                    });
+                    handleTimelineMove(e);
                 }
             }
         },
@@ -73,10 +66,7 @@ const ProgressBar = ({
 
     const handleEnd = (e) => {
         if (isDragging) {
-            const time = getTimeFromEvent(e);
-            if (time !== null) {
-                handleTimelineEnd({ time });
-            }
+            handleTimelineEnd(e);
         }
         setIsDragging(false);
     };

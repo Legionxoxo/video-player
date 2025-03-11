@@ -38,9 +38,11 @@ const VideoPlayer = ({ src }) => {
     const getPointerPosition = (e, rect) => {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
         const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const offsetX = 0;
+        const offsetY = 30;
         return {
-            x: clientX - rect.left,
-            y: clientY - rect.top,
+            x: clientX - rect.left + offsetX,
+            y: clientY - rect.top + offsetY,
         };
     };
 
@@ -202,21 +204,24 @@ const VideoPlayer = ({ src }) => {
         const canvas = canvasRef.current;
         const rect = canvas.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
-        const centerY = rect.bottom - 280; // 10px below the canvas
+        const centerY = rect.bottom - 280;
 
         setInputBoxPosition({
             x: centerX,
             y: centerY,
         });
 
-        // Auto-select 5 seconds on the timeline
-        const video = videoRef.current;
-        const start = video.currentTime;
-        const end = Math.min(start + 5, video.duration); // Ensure end does not exceed video duration
-        setTimelineSelection({ start, end });
-
-        // Generate preview frames for the selected 5 seconds
-        generatePreviewFrames(start, end);
+        // Only set a default timeline selection if none exists
+        if (
+            timelineSelection.start === null ||
+            timelineSelection.end === null
+        ) {
+            const video = videoRef.current;
+            const start = video.currentTime;
+            const end = Math.min(start + 5, video.duration);
+            setTimelineSelection({ start, end });
+            generatePreviewFrames(start, end);
+        }
 
         // Show the input box after drawing
         setInputBoxVisible(true);
@@ -236,35 +241,36 @@ const VideoPlayer = ({ src }) => {
         const x = e.clientX - rect.left;
         const time = (x / rect.width) * duration;
 
-        // Ensure video is paused in draw mode
-        if (videoRef.current && !videoRef.current.paused) {
-            videoRef.current.pause();
-            setIsPlaying(false);
-        }
-
-        // Close the input box when dragging starts
-        setInputBoxVisible(false);
-
         // Check if click is near existing start or end points
         const pixelsPerSecond = rect.width / duration;
         const tolerance = 10; // pixels
 
-        const startX = (timelineSelection.start / duration) * rect.width;
-        const endX = (timelineSelection.end / duration) * rect.width;
-        const clickX = x;
+        if (
+            timelineSelection.start !== null &&
+            timelineSelection.end !== null
+        ) {
+            const startX = (timelineSelection.start / duration) * rect.width;
+            const endX = (timelineSelection.end / duration) * rect.width;
+            const clickX = x;
 
-        const distanceToStart = Math.abs(clickX - startX);
-        const distanceToEnd = Math.abs(clickX - endX);
+            const distanceToStart = Math.abs(clickX - startX);
+            const distanceToEnd = Math.abs(clickX - endX);
 
-        if (distanceToStart <= tolerance || distanceToEnd <= tolerance) {
-            if (distanceToStart < distanceToEnd) {
-                setDraggingPoint("start");
-                setTimelineSelection((prev) => ({ ...prev, start: time }));
-            } else {
-                setDraggingPoint("end");
-                setTimelineSelection((prev) => ({ ...prev, end: time }));
+            if (distanceToStart <= tolerance || distanceToEnd <= tolerance) {
+                if (distanceToStart < distanceToEnd) {
+                    setDraggingPoint("start");
+                } else {
+                    setDraggingPoint("end");
+                }
+                setInputBoxVisible(false); // Hide input box when starting to drag points
+                return;
             }
         }
+
+        // If not dragging existing points, create new selection
+        setTimelineSelection({ start: time, end: time });
+        setDraggingPoint("end");
+        setInputBoxVisible(false); // Hide input box when starting new selection
 
         e.stopPropagation();
         e.preventDefault();
@@ -279,22 +285,20 @@ const VideoPlayer = ({ src }) => {
         const x = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
         const time = (x / rect.width) * duration;
 
-        if (draggingPoint === "start") {
-            setTimelineSelection((prev) => ({
-                ...prev,
-                start: Math.min(time, prev.end),
-            }));
-        } else if (draggingPoint === "end") {
-            setTimelineSelection((prev) => ({
-                ...prev,
-                end: Math.max(time, prev.start),
-            }));
+        // Update video current time to show frame while dragging
+        if (videoRef.current) {
+            videoRef.current.currentTime = time;
         }
 
-        // Generate preview frames while dragging
-        const start = Math.min(timelineSelection.start, timelineSelection.end);
-        const end = Math.max(timelineSelection.start, timelineSelection.end);
-        generatePreviewFrames(start, end);
+        setTimelineSelection((prev) => {
+            const newSelection = { ...prev };
+            if (draggingPoint === "start") {
+                newSelection.start = Math.min(time, prev.end);
+            } else {
+                newSelection.end = Math.max(time, prev.start);
+            }
+            return newSelection;
+        });
 
         e.stopPropagation();
         e.preventDefault();
@@ -306,13 +310,14 @@ const VideoPlayer = ({ src }) => {
         const start = Math.min(timelineSelection.start, timelineSelection.end);
         const end = Math.max(timelineSelection.start, timelineSelection.end);
 
-        // Only reset if the selection is too small
+        // Only reset if the selection is too small (less than 0.1 seconds)
         if (Math.abs(end - start) < 0.1) {
             setTimelineSelection({ start: null, end: null });
             setInputBoxVisible(false);
         } else {
+            // Preserve the timeline selection and update preview frames
+            setTimelineSelection({ start, end });
             generatePreviewFrames(start, end);
-            // Show the input box after timeline selection
             setInputBoxVisible(true);
         }
 

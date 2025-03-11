@@ -34,6 +34,7 @@ const VideoPlayer = ({ src }) => {
     const [activeTool, setActiveTool] = useState("play");
     const [draggingPoint, setDraggingPoint] = useState(null);
     const [inputBoxVisible, setInputBoxVisible] = useState(false);
+    const commentBoxRef = useRef(null);
 
     const getPointerPosition = (e, rect) => {
         const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -83,6 +84,22 @@ const VideoPlayer = ({ src }) => {
             video.removeEventListener("pause", handlePause);
             video.removeEventListener("ended", handleEnded);
             window.removeEventListener("resize", handleResize);
+        };
+    }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (
+                commentBoxRef.current &&
+                !commentBoxRef.current.contains(event.target)
+            ) {
+                setInputBoxVisible(false);
+            }
+        };
+
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
         };
     }, []);
 
@@ -575,6 +592,7 @@ const VideoPlayer = ({ src }) => {
                     {/* Comment input form */}
                     {inputBoxVisible && inputBoxPosition && (
                         <div
+                            ref={commentBoxRef}
                             style={{
                                 position: "absolute",
                                 left: inputBoxPosition.x,
@@ -656,6 +674,7 @@ const VideoPlayer = ({ src }) => {
                             previewFrames={previewFrames}
                             videoRef={videoRef}
                             showComments={showComments}
+                            isPlaying={isPlaying}
                         />
                     </div>
                 </div>

@@ -13,6 +13,7 @@ const ProgressBar = ({
     previewFrames = [],
     videoRef,
     showComments,
+    isPlaying,
 }) => {
     const [isDragging, setIsDragging] = useState(false);
     const [previewTime, setPreviewTime] = useState(null);
@@ -82,8 +83,10 @@ const ProgressBar = ({
             <div
                 ref={progressRef}
                 className={`progressBar relative cursor-pointer bg-gray-400 h-1 mr-60 ${
-                    showComments ? "w-[1000px] " : "w-[1400px] "
-                }`}
+                    showComments ? "w-[1000px]" : "w-[1400px]"
+                } ${
+                    isPlaying ? "opacity-0" : "opacity-100"
+                } transition-opacity duration-300 ease-in-out hover:opacity-100`}
                 onClick={handleClick}
                 onMouseDown={handleStart}
                 onTouchStart={handleStart}
